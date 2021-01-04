@@ -5,7 +5,11 @@ const content = {
     alt: 'corgi in the park with a sunset in the background',
     credit: 'Jacob Van Blarcom',
     creditLink: 'https://unsplash.com/photos/lkzjENdWgd8',
-    message: 'To view this content, you need to create an account!',
+    //message: 'To view this content, you need to create an account!',
+	// the following lines below don't work.
+	res = await fetch('https://services.demo.akoios.com/helloworld/hello'),
+	data_msg = await res.text(),
+	message: data_msg,
     allowedRoles: ['free', 'pro', 'premium'],
   },
   pro: {
