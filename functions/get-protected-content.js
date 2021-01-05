@@ -1,15 +1,15 @@
+// Requires node-fetch to be installed via npm by running the command:
+// npm install -S node-fetch
+const fetch = require('node-fetch')
+
 const content = {
   free: {
-    src:
-      'https://images.unsplash.com/photo-1550159930-40066082a4fc?auto=format&fit=crop&w=600&h=600&q=80',
+    src: 'https://images.unsplash.com/photo-1550159930-40066082a4fc?auto=format&fit=crop&w=600&h=600&q=80',
     alt: 'corgi in the park with a sunset in the background',
     credit: 'Jacob Van Blarcom',
     creditLink: 'https://unsplash.com/photos/lkzjENdWgd8',
-    //message: 'To view this content, you need to create an account!',
-	// the following lines below don't work.
-	res = await fetch('https://services.demo.akoios.com/helloworld/hello'),
-	data_msg = await res.text(),
-	message: data_msg,
+    // message: 'To view this content, you need to create an account!',
+    message: null,
     allowedRoles: ['free', 'pro', 'premium'],
   },
   pro: {
@@ -39,18 +39,25 @@ exports.handler = async (event, context) => {
   const { user } = context.clientContext;
   const roles = user ? user.app_metadata.roles : false;
   const { allowedRoles } = content[type];
-  
+
+  // Pull message from the Akoios service
+  if (type === 'free') {
+    const res = await fetch('https://services.demo.akoios.com/helloworld/hello')
+    const message = await res.text()
+    content[type].message = message
+  }
+
   if (!roles || !roles.some(role => allowedRoles.includes(role))) {
-	  return {
-		  statusCode: 402,
-		  body: JSON.stringify({
-			  src: 'https://res.cloudinary.com/jlengstorf/image/upload/q_auto,f_auto/v1592618179/stripe-subscription/subscription-required.jpg',
-			  alt: 'corgi in a crossed circle with the text “subscription required”',
-			  credit: 'Jason Lengstorf',
-			  creditLink: 'https://dribbble.com/jlengstorf',
-			  message: `This content requires a ${type} subscription.`,
-		  }),
-	  };
+    return {
+      statusCode: 402,
+      body: JSON.stringify({
+        src: 'https://res.cloudinary.com/jlengstorf/image/upload/q_auto,f_auto/v1592618179/stripe-subscription/subscription-required.jpg',
+        alt: 'corgi in a crossed circle with the text “subscription required”',
+        credit: 'Jason Lengstorf',
+        creditLink: 'https://dribbble.com/jlengstorf',
+        message: `This content requires a ${type} subscription.`,
+      }),
+    };
   }
 
   return {
